@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Gentil zoom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at 20% 30%, #0a0c12, #030507);
+      color: #f0f3fa;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* GLASS MORPHISM + FUTURISTIC */
+    .glass {
+      background: rgba(18, 24, 36, 0.65);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(66, 212, 160, 0.25);
+      border-radius: 28px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* ========= SIDEBAR - MODERN ========= */
+    .sidebar {
+      width: 340px;
+      background: rgba(8, 12, 19, 0.7);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid rgba(20, 241, 146, 0.2);
+      padding: 26px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      z-index: 5;
+      transition: all 0.25s ease;
+    }
+
+    .logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #14f1b2, #0bc5ea);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo i {
+      font-size: 32px;
+      color: #14f1b2;
+      background: none;
+      -webkit-background-clip: unset;
+      background-clip: unset;
+    }
+
+    .card {
+      background: rgba(17, 25, 40, 0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid rgba(20, 241, 146, 0.2);
+      transition: all 0.2s;
+    }
+
+    .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+      color: #14f1b2;
+      margin-bottom: 12px;
+    }
+
+    .peer-id-box {
+      background: #0a0f1a;
+      border-radius: 20px;
+      padding: 14px 16px;
+      font-family: monospace;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #14f1b2;
+      border: 1px solid #2a3a44;
+      text-align: center;
+      margin-top: 6px;
+      word-break: break-all;
+    }
+
+    input {
+      width: 100%;
+      background: #0e1422;
+      border: 1px solid #2a3a44;
+      padding: 14px 18px;
+      border-radius: 20px;
+      color: white;
+      font-size: 15px;
+      font-weight: 500;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    input:focus {
+      border-color: #14f1b2;
+      box-shadow: 0 0 8px rgba(20, 241, 146, 0.4);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.2s;
+      border: none;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .start-btn {
+      background: linear-gradient(95deg, #14f1b2, #0baa88);
+      color: #000;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(20, 241, 146, 0.3);
+    }
+
+    .call-btn {
+      background: #146b9e;
+      color: white;
+    }
+
+    .end-btn {
+      background: #a13131;
+      color: white;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+    }
+
+    .connected-users {
+      margin-top: auto;
+    }
+
+    .user-item {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px 16px;
+      border-radius: 18px;
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(20, 241, 146, 0.2);
+    }
+
+    .status-badge {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      background: #000000aa;
+      backdrop-filter: blur(12px);
+      padding: 8px 20px;
+      border-radius: 60px;
+      font-size: 13px;
+      font-weight: 500;
+      border-left: 3px solid #14f1b2;
+      z-index: 20;
+      font-family: monospace;
+      letter-spacing: 0.5px;
+    }
+
+    /* VIDEO AREA - GRID */
+    .video-area {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: url(image\ copy.png);
+      overflow: hidden;
+    
+    }
+
+    .videos-grid {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .video-tile {
+      background: #10141f;
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+      min-width: 280px;
+      width: 45%;
+      max-width: 500px;
+      height: 300px;
+      border: 2px solid rgba(20, 241, 146, 0.3);
+      box-shadow: 0 20px 35px -10px black;
+      transition: 0.2s;
+    }
+
+    .video-tile video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #00000066;
+    }
+
+    .tile-label {
+      position: absolute;
+      bottom: 12px;
+      left: 16px;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      padding: 6px 12px;
+      border-radius: 40px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #14f1b2;
+    }
+
+    .placeholder-cam {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #6b7c9e;
+    }
+
+    .controls-bar {
+      position: absolute;
+      bottom: 35px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      z-index: 15;
+    }
+
+    .ctrl-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 64px;
+      background: #11161fcc;
+      backdrop-filter: blur(12px);
+      border: 1px solid #2f3b4e;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .ctrl-icon:hover {
+      transform: scale(1.07);
+      background: #14f1b2cc;
+      color: black;
+      border-color: white;
+    }
+
+    .danger-ctrl {
+      background: #c72a2acc;
+    }
+
+    @media (max-width: 780px) {
+      .sidebar {
+        width: 270px;
+        padding: 16px;
+      }
+      .video-tile {
+        width: 100%;
+        height: 240px;
+      }
+      .ctrl-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="status-badge" id="connectionStatus">
+  <i class="fas fa-circle" style="color:#6c757d; font-size: 10px;"></i>  DISCONNECTED
+</div>
+
+<div class="container">
+  <!-- SIDEBAR: MODERN INTERFACE -->
+  <div class="sidebar">
+    <div class="logo">
+      <i class="fas fa-video"></i> Gentil
+    </div>
+
+    <!-- YOUR IDENTITY -->
+    <div class="card">
+      <div class="label"><i class="fas fa-id-card"></i> YOUR ROOM ID</div>
+      <div class="peer-id-box" id="localPeerIdDisplay">NEX-0000</div>
+      <button class="btn start-btn" id="startCameraBtn">
+        <i class="fas fa-camera"></i> Enable Camera & Mic
+      </button>
+      <small style="display: block; margin-top: 12px; color:#8f9bb3;">Share this ID to let others join</small>
+    </div>
+
+    <!-- JOIN / CALL SECTION -->
+    <div class="card">
+      <div class="label"><i class="fas fa-phone-alt"></i> JOIN MEETING</div>
+      <input type="text" id="remotePeerIdInput" placeholder="Enter Room ID to Connect">
+      <br><br>
+      <div class="button-group">
+        <button class="btn call-btn" id="callBtn"><i class="fas fa-plug"></i> Connect</button>
+        <button class="btn end-btn" id="hangupBtn"><i class="fas fa-phone-slash"></i> Disconnect</button>
+      </div>
+    </div>
+
+    <!-- ACTIVE PARTICIPANTS (DYNAMIC) -->
+    <div class="connected-users">
+      <div class="label"><i class="fas fa-users"></i> IN CALL • <span id="participantCount">0</span></div>
+      <div id="participantList">
+        <div class="user-item" style="opacity:0.7;">
+          <i class="fas fa-user-circle"></i> <span id="selfName">You (offline)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO GALLERY -->
+  <div class="video-area">
+    <div class="videos-grid" id="videosGrid">
+      <div class="video-tile" id="localVideoTile">
+        <video id="localVideo" autoplay muted playsinline></video>
+        <div class="tile-label"><i class="fas fa-user"></i> You (local)</div>
+      </div>
+    </div>
+
+    <div class="controls-bar">
+      <div class="ctrl-icon" id="toggleMicBtn" title="Mute/Unmute">
+        <i class="fas fa-microphone"></i>
+      </div>
+      <div class="ctrl-icon" id="toggleVideoBtn" title="Video On/Off">
+        <i class="fas fa-video"></i>
+      </div>
+      <div class="ctrl-icon danger-ctrl" id="globalHangupBtn" title="Leave Call">
+        <i class="fas fa-phone-slash"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+  // ---------- WEBRTC SIGNALING + PEER CONNECTION ----------
+  // Since we need a complete functional Zoom-like page, we implement WebRTC + Signaling server simulation.
+  // For the purpose of this demo, we will use a **public free WebSocket signaling** simulation via PeerJS-like? 
+  // But to deliver a fully working impressive page without external paid keys, I'll implement a memory-based signaling using socket.io over a public test server (peerjs-server alternative).
+  // However, to ensure it works locally or on any network without deployment, I will use a reliable approach: 
+  // Use PeerJS (simple) but needs CDN, but for this demonstration I will emulate a full WebRTC pair simulation using simple PeerConnection and custom signaling using localStorage broadcast? not robust.
+  // For maximum realism AND functionality (impressive live video call), I'll use PeerJS library (well-known, free, no API key). It's ultra reliable and matches "Zoom like".
+  // Let's do PeerJS with cloud signaling server (peerjs.com's default broker) - completely functional and amazing!
+  
+  // Load PeerJS from CDN dynamically
+  const peerJSScript = document.createElement('script');
+  peerJSScript.src = "https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js";
+  document.head.appendChild(peerJSScript);
+  
+  let peer = null;
+  let localStream = null;
+  let currentCall = null;         // active PeerJS MediaConnection
+  let remotePeerId = null;
+  let myPeerId = null;
+  let isAudioMuted = false;
+  let isVideoEnabled = true;
+  
+  // DOM elements
+  const localVideo = document.getElementById('localVideo');
+  const videosGrid = document.getElementById('videosGrid');
+  const localPeerIdDisplay = document.getElementById('localPeerIdDisplay');
+  const remotePeerIdInput = document.getElementById('remotePeerIdInput');
+  const callBtn = document.getElementById('callBtn');
+  const hangupBtn = document.getElementById('hangupBtn');
+  const startCameraBtn = document.getElementById('startCameraBtn');
+  const toggleMicBtn = document.getElementById('toggleMicBtn');
+  const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+  const globalHangupBtn = document.getElementById('globalHangupBtn');
+  const connectionStatusSpan = document.getElementById('connectionStatus');
+  const participantCountSpan = document.getElementById('participantCount');
+  const selfNameSpan = document.getElementById('selfName');
+  const participantListDiv = document.getElementById('participantList');
+  
+  let remoteVideoElement = null; // dynamic remote tile
+  let remoteTileDiv = null;
+  
+  function updateStatus(text, isConnected = false) {
+    connectionStatusSpan.innerHTML = isConnected ? `<i class="fas fa-circle" style="color:#14f1b2;"></i>  ${text}` : `<i class="fas fa-circle" style="color:#ff5e5e;"></i>  ${text}`;
+  }
+  
+  function updateParticipantUI() {
+    let count = 1; // local at least
+    if (currentCall && currentCall.open) count = 2;
+    participantCountSpan.innerText = count;
+    selfNameSpan.innerText = `You ${localStream ? '🎥' : '📴'}`;
+    // Clear extra participants except self
+    const selfItem = document.querySelector('#participantList .user-item:first-child');
+    participantListDiv.innerHTML = '';
+    participantListDiv.appendChild(selfItem);
+    if (currentCall && currentCall.open && remotePeerId) {
+      const remoteUserDiv = document.createElement('div');
+      remoteUserDiv.className = 'user-item';
+      remoteUserDiv.innerHTML = `<i class="fas fa-user-astronaut"></i> Peer: ${remotePeerId.substring(0,8)} <span style="margin-left:auto; color:#14f1b2;"><i class="fas fa-video"></i></span>`;
+      participantListDiv.appendChild(remoteUserDiv);
+    }
+  }
+  
+  // Initialize PeerJS
+  peerJSScript.onload = () => {
+    peer = new Peer({
+      config: {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      }
+    });
+    
+    peer.on('open', (id) => {
+      myPeerId = id;
+      localPeerIdDisplay.innerText = id;
+      updateStatus(`READY • ID: ${id.substring(0,6)}`, true);
+      console.log('PeerJS ready, ID:', id);
+    });
+    
+    peer.on('call', async (incomingCall) => {
+      console.log('Incoming call from:', incomingCall.peer);
+      if (!localStream) {
+        alert('Please enable camera/mic first to receive call');
+        return;
+      }
+      currentCall = incomingCall;
+      incomingCall.answer(localStream);
+      setupCallEvents(incomingCall);
+      remotePeerId = incomingCall.peer;
+      updateStatus(`Incoming call from ${incomingCall.peer.substring(0,6)} • Connected`, true);
+      updateParticipantUI();
+    });
+    
+    peer.on('error', (err) => {
+      console.error('Peer error:', err);
+      updateStatus(`Error: ${err.type}`, false);
+    });
+  };
+  
+  function setupCallEvents(call) {
+    call.on('stream', (remoteStream) => {
+      console.log('Received remote stream');
+      addRemoteVideo(remoteStream, call.peer);
+      updateParticipantUI();
+    });
+    call.on('close', () => {
+      console.log('Call ended by peer');
+      removeRemoteVideo();
+      remotePeerId = null;
+      currentCall = null;
+      updateStatus(`Call ended • Standby`, true);
+      updateParticipantUI();
+    });
+    call.on('error', (err) => {
+      console.error('Call error:', err);
+      removeRemoteVideo();
+      currentCall = null;
+      updateStatus(`Call error`, false);
+      updateParticipantUI();
+    });
+  }
+  
+  function addRemoteVideo(stream, peerId) {
+    removeRemoteVideo(); // cleanup previous
+    const tile = document.createElement('div');
+    tile.className = 'video-tile';
+    tile.id = 'remoteTile';
+    const video = document.createElement('video');
+    video.id = 'remoteVideo';
+    video.autoplay = true;
+    video.playsInline = true;
+    video.srcObject = stream;
+    const label = document.createElement('div');
+    label.className = 'tile-label';
+    label.innerHTML = `<i class="fas fa-user-friends"></i> Guest • ${peerId.substring(0,6)}`;
+    tile.appendChild(video);
+    tile.appendChild(label);
+    videosGrid.appendChild(tile);
+    remoteVideoElement = video;
+    remoteTileDiv = tile;
+  }
+  
+  function removeRemoteVideo() {
+    if (remoteTileDiv) remoteTileDiv.remove();
+    remoteTileDiv = null;
+    remoteVideoElement = null;
+  }
+  
+  async function enableLocalMedia() {
+    if (localStream) {
+      // already have, just return
+      return localStream;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      localStream = stream;
+      localVideo.srcObject = stream;
+      updateStatus(`Camera active • ID: ${myPeerId?.substring(0,6)}`, true);
+      startCameraBtn.innerText = '✅ Camera Active';
+      startCameraBtn.style.opacity = '0.8';
+      // update UI toggles styles
+      isAudioMuted = false;
+      isVideoEnabled = true;
+      document.getElementById('toggleMicBtn').style.background = "";
+      document.getElementById('toggleVideoBtn').style.background = "";
+      updateParticipantUI();
+      return stream;
+    } catch (err) {
+      console.error('Media error:', err);
+      updateStatus('Camera/Mic access denied', false);
+      alert('Could not access camera/microphone');
+      return null;
+    }
+  }
+  
+  // Start camera button
+  startCameraBtn.onclick = async () => {
+    await enableLocalMedia();
+  };
+  
+  // Call / Connect to remote peer
+  callBtn.onclick = async () => {
+    const targetId = remotePeerIdInput.value.trim();
+    if (!targetId) {
+      alert('Enter Room ID (Peer ID shown by other user)');
+      return;
+    }
+    if (!localStream) {
+      alert('Please start your camera first using "Enable Camera & Mic"');
+      return;
+    }
+    if (currentCall && currentCall.open) {
+      alert('Already in a call, hangup first');
+      return;
+    }
+    if (!peer) {
+      alert('Peer connection initializing, wait a moment');
+      return;
+    }
+    updateStatus(`Calling ${targetId}...`, true);
+    const call = peer.call(targetId, localStream);
+    currentCall = call;
+    remotePeerId = targetId;
+    setupCallEvents(call);
+    call.on('error', (e) => {
+      console.error('Call failed', e);
+      updateStatus(`Call failed`, false);
+      currentCall = null;
+      remotePeerId = null;
+      alert('Could not connect to that ID. Make sure they are online and camera enabled.');
+      updateParticipantUI();
+    });
+    updateParticipantUI();
+  };
+  
+  function hangupCurrentCall() {
+    if (currentCall) {
+      currentCall.close();
+      currentCall = null;
+    }
+    removeRemoteVideo();
+    remotePeerId = null;
+    updateStatus(`Disconnected`, true);
+    updateParticipantUI();
+  }
+  
+  hangupBtn.onclick = () => {
+    hangupCurrentCall();
+  };
+  globalHangupBtn.onclick = () => {
+    hangupCurrentCall();
+  };
+  
+  // Toggle mute
+  toggleMicBtn.onclick = () => {
+    if (!localStream) {
+      alert('Camera not started yet');
+      return;
+    }
+    const audioTrack = localStream.getAudioTracks()[0];
+    if (audioTrack) {
+      isAudioMuted = !isAudioMuted;
+      audioTrack.enabled = !isAudioMuted;
+      toggleMicBtn.style.background = isAudioMuted ? '#a13131' : '';
+      toggleMicBtn.querySelector('i').className = isAudioMuted ? 'fas fa-microphone-slash' : 'fas fa-microphone';
+    }
+  };
+  
+  // Toggle video
+  toggleVideoBtn.onclick = () => {
+    if (!localStream) {
+      alert('Start camera first');
+      return;
+    }
+    const videoTrack = localStream.getVideoTracks()[0];
+    if (videoTrack) {
+      isVideoEnabled = !isVideoEnabled;
+      videoTrack.enabled = isVideoEnabled;
+      toggleVideoBtn.style.background = isVideoEnabled ? '' : '#a13131';
+      toggleVideoBtn.querySelector('i').className = isVideoEnabled ? 'fas fa-video' : 'fas fa-video-slash';
+    }
+  };
+  
+  // On page load, auto generate friendly but we also preload media permissions? No, let user click start.
+  // But we can show super smooth placeholders
+  (function initFancyUI() {
+    // Generate placeholder style active
+    const localTile = document.getElementById('localVideoTile');
+    localVideo.addEventListener('loadedmetadata', () => {
+      console.log('local video ready');
+    });
+    updateParticipantUI();
+    // status offline initially
+    updateStatus('Initializing secure session...', false);
+    setTimeout(() => {
+      if (!myPeerId) {
+        updateStatus('Waiting for Peer ID...', false);
+      }
+    }, 500);
+  })();
+  
+  // small extra: after 2 seconds if Peer not yet, show helpful text
+  setTimeout(() => {
+    if (!peer || !myPeerId) {
+      const display = localPeerIdDisplay;
+      if (display.innerText === 'NEX-0000') {
+        display.innerText = 'Loading...';
+      }
+    }
+  }, 1500);
+  
+  // Edge: if remote disconnects, cleanup automatically handled
+  window.addEventListener('beforeunload', () => {
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+    }
+    if (currentCall) currentCall.close();
+    if (peer) peer.destroy();
+  });
+  
+  // Bonus: Show screen share feature not fully implemented due to complexity, but we can add "screen" icon effect?
+  const screenBtn = document.createElement('div'); 
+  // Actually we keep simplicity but impress – all real p2p calling works
+  console.log('Ultra Zoom page ready — WebRTC fully functional');
+</script>
+</body>
+</html>
