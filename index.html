@@ -205,16 +205,24 @@
         letter-spacing: 0.5px;
       }
 
-      /* VIDEO AREA - GRID */
-      .video-area {
-        flex: 1;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        background: url("image copy.png");
-        overflow: hidden;
-      }
+  .video-area {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: url("image copy.png") center/cover no-repeat;
+  overflow: hidden;
+}
 
+/* DARK OVERLAY FOR VIDEO READABILITY  video area */
+.video-area::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(2px);
+  z-index: 0;
+}
       .videos-grid {
         flex: 1;
         display: flex;
